@@ -1,0 +1,14 @@
+{
+  "editor.tabSize": 2,
+  "editor.useTabStops": true,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": false,
+  "editor.trimAutoWhitespace": true,
+  "editor.detectIndentation": false,
+  "editor.rulers": [
+    120
+  ],
+  "files.trimFinalNewlines": true,
+  "files.insertFinalNewline": true,
+  "files.eol": "\n"
+}

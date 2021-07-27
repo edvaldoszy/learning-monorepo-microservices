@@ -1,0 +1,9 @@
+{
+  "name": "monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Edvaldo Szymonek <edvaldoszy@gmail.com>",
+  "workspaces": [
+    "packages/*"
+  ]
+}

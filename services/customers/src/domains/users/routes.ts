@@ -1,4 +1,5 @@
 import { Route } from '~/routes';
+
 import controllers from './controllers';
 
 const routes: Route[] = [
@@ -8,7 +9,7 @@ const routes: Route[] = [
     handlers: [
       controllers.find,
     ],
-  }
+  },
 ];
 
 export default routes;

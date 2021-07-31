@@ -5,6 +5,9 @@
   "editor.formatOnSave": false,
   "editor.trimAutoWhitespace": true,
   "editor.detectIndentation": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
   "editor.rulers": [
     120
   ],

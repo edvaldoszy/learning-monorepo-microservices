@@ -6,7 +6,8 @@
   "scripts": {
     "build:types": "yarn workspaces foreach run build:types",
     "build": "yarn workspaces foreach run build",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint --cache --ext '.js,.ts' ."
   },
   "workspaces": [
     "packages/*",
@@ -14,6 +15,11 @@
   ],
   "devDependencies": {
     "@types/jest": "26.0.24",
+    "@typescript-eslint/parser": "4.28.5",
+    "eslint": "7.32.0",
+    "eslint-import-resolver-typescript": "2.4.0",
+    "eslint-plugin-import": "2.23.4",
+    "eslint-plugin-import-helpers": "1.1.0",
     "jest": "27.0.6",
     "typescript": "4.3.5"
   }

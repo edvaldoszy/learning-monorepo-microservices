@@ -4,11 +4,13 @@
   "private": true,
   "author": "Edvaldo Szymonek <edvaldoszy@gmail.com>",
   "scripts": {
+    "build:types": "yarn workspaces foreach run build:types",
     "build": "yarn workspaces foreach run build",
     "test": "jest"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "services/*"
   ],
   "devDependencies": {
     "@types/jest": "26.0.24",

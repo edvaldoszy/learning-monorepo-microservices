@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "paths": {
       "~/*": ["./src/*"]
-    },
+    }
   },
   "include": [
     "./src"

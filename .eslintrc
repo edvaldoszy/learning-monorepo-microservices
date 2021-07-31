@@ -4,13 +4,15 @@
     "ecmaVersion": 2020,
     "project": "./tsconfig.json"
   },
+  "env": {
+    "jest/globals": true
+  },
   "plugins": [
-    "import",
+    "jest",
     "import-helpers"
   ],
   "extends": [
-    "plugin:import/recommended",
-    "plugin:import/typescript"
+    "airbnb-base"
   ],
   "settings": {
     "import/resolver": {
@@ -23,13 +25,26 @@
     }
   },
   "rules": {
-    "quotes": [
+    "no-console": [
       "error",
-      "single"
+      {
+        "allow": [
+          "warn",
+          "info"
+        ]
+      }
     ],
-    "comma-dangle": [
+    "arrow-parens": [
+      "warn",
+      "as-needed"
+    ],
+    "import/extensions": [
       "error",
-      "always-multiline"
+      "ignorePackages",
+      {
+        "js": "never",
+        "ts": "never"
+      }
     ],
     "import-helpers/order-imports": [
       "warn",

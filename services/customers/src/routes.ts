@@ -20,7 +20,7 @@ export type Route = {
   handlers: Handler[];
 };
 
-const routes: Route[]  = readdirSync(domainsRootDirectory)
+const routes: Route[] = readdirSync(domainsRootDirectory)
   .map(getFileAbsolutePath)
   .filter(existsModule)
   .flatMap(requireModule);

@@ -5,6 +5,7 @@
   "editor.formatOnSave": false,
   "editor.trimAutoWhitespace": true,
   "editor.detectIndentation": false,
+  "editor.semanticHighlighting.enabled": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },

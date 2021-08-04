@@ -8,8 +8,9 @@
     "jest/globals": true
   },
   "plugins": [
-    "jest",
-    "import-helpers"
+    "@typescript-eslint",
+    "import-helpers",
+    "jest"
   ],
   "extends": [
     "airbnb-base"
@@ -38,6 +39,19 @@
       "warn",
       "as-needed"
     ],
+    "lines-between-class-members": [
+      "error",
+      "always",
+      {
+        "exceptAfterSingleLine": true
+      }
+    ],
+    "padded-blocks": [
+      "error",
+      {
+        "classes": "always"
+      }
+    ],
     "import/extensions": [
       "error",
       "ignorePackages",
@@ -46,6 +60,7 @@
         "ts": "never"
       }
     ],
+    "import/prefer-default-export": "off",
     "import-helpers/order-imports": [
       "warn",
       {
@@ -63,6 +78,12 @@
           "order": "asc",
           "ignoreCase": true
         }
+      }
+    ],
+    "@typescript-eslint/type-annotation-spacing": [
+      "error",
+      {
+        "after": true
       }
     ]
   }

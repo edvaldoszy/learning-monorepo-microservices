@@ -1,9 +1,11 @@
 import HttpError from './http-error';
 
-export default class ForbiddenError extends HttpError {
+class ForbiddenError extends HttpError {
 
   constructor(errorCode: number) {
     super(403, errorCode);
   }
 
 }
+
+export default ForbiddenError;

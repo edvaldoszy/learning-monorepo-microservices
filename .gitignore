@@ -2,10 +2,12 @@ dist
 node_modules
 mysql/data
 
-.eslintcache
-
 *.env*
 !.env.example
+.eslintcache
+
+*.pem
+*.pub
 
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .yarn/*

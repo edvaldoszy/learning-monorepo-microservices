@@ -2,7 +2,8 @@ import { App, Handler } from '@tinyhttp/app';
 import { readdirSync, existsSync } from 'fs';
 import { resolve, join } from 'path';
 
-import errorsMiddleware from '~/middlewares/errors';
+import authorizationsMiddleware from './middlewares/authorizations';
+import errorsMiddleware from './middlewares/errors';
 
 const domainsRootDirectory = resolve(__dirname, 'domains');
 
@@ -37,7 +38,7 @@ routes.forEach(route => {
   if (route.public) {
     middlewares = handlers;
   } else {
-    middlewares = [...handlers];
+    middlewares = [authorizationsMiddleware, ...handlers];
   }
 
   if (route.internal) {

@@ -24,7 +24,24 @@ async function login(request: Request, response: Response) {
 
   const payload = {
     sub: user.id,
-    email: user.email,
+    role: 'USER',
+  };
+  const token = generateJwt(payload);
+
+  response
+    .json({ token });
+}
+
+async function refresh(request: Request, response: Response) {
+  const user = await knex('users')
+    .where({
+      id: request.user.id,
+      active: true,
+    })
+    .first();
+
+  const payload = {
+    sub: user.id,
     role: 'USER',
   };
   const token = generateJwt(payload);
@@ -35,4 +52,5 @@ async function login(request: Request, response: Response) {
 
 export default {
   login,
+  refresh,
 };

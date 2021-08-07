@@ -4,8 +4,8 @@
     "lib": [
       "es2020"
     ],
-    "allowJs": true,
-    "checkJs": true,
+    "allowJs": false,
+    "checkJs": false,
     "strict": true,
     "skipLibCheck": true,
     "removeComments": true,
@@ -13,7 +13,10 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist"
-  }
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": [
+    "./node_modules",
+    "./services/*/dist"
+  ]
 }

@@ -4,10 +4,18 @@ import controllers from './controllers';
 
 const routes: Route[] = [
   {
+    public: true,
     method: 'post',
     path: '/users/login',
     handlers: [
       controllers.login,
+    ],
+  },
+  {
+    method: 'put',
+    path: '/users/login',
+    handlers: [
+      controllers.refresh,
     ],
   },
 ];

@@ -1,10 +1,11 @@
 {
   "name": "monorepo",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "author": "Edvaldo Szymonek <edvaldoszy@gmail.com>",
   "scripts": {
     "build:types": "yarn workspaces foreach run build:types",
+    "build:packages": "yarn workspaces foreach -v --include='@monorepo/helpers' run build",
     "build": "yarn workspaces foreach run build",
     "test": "jest",
     "lint": "eslint --cache --ext '.js,.ts' ."

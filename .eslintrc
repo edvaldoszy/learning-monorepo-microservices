@@ -61,6 +61,16 @@
       }
     ],
     "import/prefer-default-export": "off",
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": [
+          "**/test/*",
+          "**/*.test.ts",
+          "**/*.spec.ts"
+        ]
+      }
+    ],
     "import-helpers/order-imports": [
       "warn",
       {

@@ -6,6 +6,14 @@ const routes: Route[] = [
   {
     public: true,
     method: 'post',
+    path: '/users/register',
+    handlers: [
+      controllers.register,
+    ],
+  },
+  {
+    public: true,
+    method: 'post',
     path: '/users/login',
     handlers: [
       controllers.login,

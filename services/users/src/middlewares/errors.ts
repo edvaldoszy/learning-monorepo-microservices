@@ -14,6 +14,7 @@ function errorsMiddleware(err: any, _request: Request, response: Response) {
       .status(err.statusCode)
       .json({
         error: {
+          name: err.name,
           code: errorCode,
           message: errorMessage,
           report: err.report,

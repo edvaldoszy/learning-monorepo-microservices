@@ -1,0 +1,22 @@
+{
+  "name": "@monorepo/helpers",
+  "version": "1.0.0",
+  "main": "./dist/index",
+  "scripts": {
+    "build:babel": "babel src --out-dir dist --delete-dir-on-start --extensions '.js,.ts' --ignore '**/*.spec.ts,**/*.test.ts' --copy-files --no-copy-ignored",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build": "run-s build:babel build:types",
+    "test": "jest --detectOpenHandles --forceExit"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.14.8",
+    "@babel/core": "7.14.8",
+    "@babel/node": "7.14.7",
+    "@babel/preset-env": "7.14.8",
+    "@babel/preset-typescript": "7.14.5",
+    "babel-plugin-module-resolver": "4.1.0",
+    "jest": "27.0.6",
+    "npm-run-all": "4.1.5",
+    "typescript": "4.3.5"
+  }
+}

@@ -5,7 +5,7 @@ module.exports = {
   displayName: name,
   testEnvironment: 'node',
   setupFiles: [
-    '<rootDir>/test/setup.ts',
+    '<rootDir>/src/setup.ts',
   ],
   transform: {
     '\\.[jt]s$': ['babel-jest', { cwd: __dirname }],

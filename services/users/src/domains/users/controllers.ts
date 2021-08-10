@@ -83,7 +83,10 @@ async function refresh(request: Request, response: Response) {
   const token = generateJwt(payload);
 
   response
-    .json({ token });
+    .json({
+      token,
+      user: omit(user, ['password']),
+    });
 }
 
 export default {

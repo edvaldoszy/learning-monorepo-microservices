@@ -1,13 +1,12 @@
-import { App } from '@tinyhttp/app';
 import { logger } from '@tinyhttp/logger';
 import { json } from 'body-parser';
 
-import errorsMiddleware from './middlewares/errors';
+import createApp from './factories/app';
 import routes from './routes';
 
-const app = new App({ onError: errorsMiddleware });
+const app = createApp();
 app.use(logger());
 app.use(json({ strict: true }));
-app.use(routes as App);
+app.use(routes);
 
 export default app;

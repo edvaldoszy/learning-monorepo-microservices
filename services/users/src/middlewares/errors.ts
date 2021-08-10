@@ -1,9 +1,10 @@
 import { Request, Response } from '@tinyhttp/app';
 
 import HttpError from '~/errors/http-error';
+import NotFoundError from '~/errors/not-found';
 import errorCodes from '~/resources/error-codes';
 
-function errorsMiddleware(err: any, _request: Request, response: Response) {
+export function errorMiddleware(err: any, _request: Request, response: Response) {
   console.warn(err);
 
   if (err instanceof HttpError) {
@@ -34,4 +35,6 @@ function errorsMiddleware(err: any, _request: Request, response: Response) {
     });
 }
 
-export default errorsMiddleware;
+export function notFoundMiddleware() {
+  throw new NotFoundError(20);
+}

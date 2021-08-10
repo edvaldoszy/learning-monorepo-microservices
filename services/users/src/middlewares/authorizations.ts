@@ -14,7 +14,7 @@ function extractAuthWithScheme(scheme: string, authorization: string) {
   return null;
 }
 
-async function authorizationsMiddleware(request: Request, _: Response, next: NextFunction) {
+async function authorizationMiddleware(request: Request, _: Response, next: NextFunction) {
   const { authorization } = request.headers;
   if (!authorization) {
     throw new UnauthorizedError(30);
@@ -41,4 +41,4 @@ async function authorizationsMiddleware(request: Request, _: Response, next: Nex
   next();
 }
 
-export default authorizationsMiddleware;
+export default authorizationMiddleware;

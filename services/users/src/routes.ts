@@ -1,9 +1,9 @@
-import { App, Handler } from '@tinyhttp/app';
+import { Handler } from '@tinyhttp/app';
 import { readdirSync, existsSync } from 'fs';
 import { resolve, join } from 'path';
 
-import authorizationsMiddleware from './middlewares/authorizations';
-import errorsMiddleware from './middlewares/errors';
+import createApp from './factories/app';
+import authorizationMiddleware from './middlewares/authorizations';
 
 const domainsRootDirectory = resolve(__dirname, 'domains');
 
@@ -28,8 +28,8 @@ const routes: Route[] = readdirSync(domainsRootDirectory)
   .filter(existsModule)
   .flatMap(requireModule);
 
-const api = new App({ onError: errorsMiddleware });
-const internal = new App({ onError: errorsMiddleware });
+const api = createApp();
+const internal = createApp();
 
 routes.forEach(route => {
   const { method, path, handlers } = route;
@@ -38,7 +38,7 @@ routes.forEach(route => {
   if (route.public) {
     middlewares = handlers;
   } else {
-    middlewares = [authorizationsMiddleware, ...handlers];
+    middlewares = [authorizationMiddleware, ...handlers];
   }
 
   if (route.internal) {

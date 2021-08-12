@@ -1,14 +1,10 @@
 dist
+mysql
+mongo
+nginx
 node_modules
-mysql/data
-mongo/data
 
 *.env*
-!.env.example
-.eslintcache
-
-*.pem
-*.pub
 
 # https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .yarn/*

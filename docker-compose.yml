@@ -3,7 +3,7 @@ version: '3.4'
 services:
   mysql:
     image: mysql:8.0
-    container_name: learning_monorepo_mysql
+    container_name: monorepo_mysql
     environment:
       MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
     volumes:
@@ -17,3 +17,97 @@ services:
       - --collation-server=utf8mb4_0900_ai_ci
       - --sql-require-primary-key=ON
       - --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+  mongo:
+    image: mongo:4.0
+    container_name: monorepo_mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    volumes:
+      - ./mongo/data:/data/db
+    ports:
+      - ${MONGO_PORT}:27017
+    command: --auth
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: monorepo_redis
+    ports:
+      - ${REDIS_PORT}:6379
+
+  rabbitmq:
+    image: rabbitmq:3.8-alpine
+    container_name: monorepo_rabbitmq
+    ports:
+      - ${RABBITMQ_PORT}:5672
+  
+  users_service:
+    image: users-service:latest
+    container_name: monorepo_users_service
+    build:
+      context: .
+      dockerfile: service.dockerfile
+      args:
+        SERVICE_NAME: 'users'
+    env_file:
+      - ./services/users/.env
+    environment:
+      MYSQL_HOST: mysql
+      AUTH_PRIVATE_KEY: |-
+        -----BEGIN RSA PRIVATE KEY-----
+        MIICXgIBAAKBgQC43UF6vXOjuun1d1+jYs/lauEQySSWmsg2w3i7q4TsZbjEs4op
+        bh1e0R7RG23fsgJO7b/rhLOKiKbemX5G/Mt/OztQAurY0hxp/rFS2ORyOsw/oCVc
+        VO88CmPoySqNZemHNKq6T7DIgAnVMvLPNw37/KeD9FX275ENKix5RA3TYwIDAQAB
+        AoGAC0zLAduuw+VbA7wmRnB10Mo1s7b325TehCpyqNYVK/YT00I+QcYPWYpi3dlV
+        YAUbiwORZa4Y43Dy8kxjoac2MRgcT9ejFG22TgCkSL3d7x9hIo7zf8DyeivZi/CC
+        HTgp2vN30qNCrVAklW1h56BP1mavnJ1MlbHstqj78C5fPVECQQDqbsUybY6p+mTh
+        dftlnOpv3ZvzKKZAjfYbU0gCm8aflQMeJ+HLUi9bSxWp3i6fdDiGaSpJ6UVrTKW0
+        NR/i3QsVAkEAyd8T1AJVeylSwtpf4EG3QOH9hPq/w7fbELJRqKWr6tCL7W9pgp++
+        aUHHdjUnaoTB5Q1xw2X73liPe+9ZvkWilwJBAJdC7b4B7qFCTMEkzRbdTm7rgGo+
+        ejcA4iDzdW0pcdkZ3q8gcJIt7xxqsAmwsEh2RtqDFKQn/YCkLe6+sFpC4ZkCQQCG
+        v9Nad1xb48+MpXvOE8+hDbjOZRpQKI+f64e6jSveh+p/SRkiykKtu+zKqNxwq8FJ
+        hdnkVlTzrCXK0pATBCRtAkEAjOx5z0K32Lc9JYONxw18ODaYtiFQgv6zBH6um/KD
+        wD0gfgth1jQcyRUFjKdw8FSNSHJNfY669Yoema/vjRa1vQ==
+        -----END RSA PRIVATE KEY-----
+      AUTH_PUBLIC_KEY: |-
+        -----BEGIN PUBLIC KEY-----
+        MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC43UF6vXOjuun1d1+jYs/lauEQ
+        ySSWmsg2w3i7q4TsZbjEs4opbh1e0R7RG23fsgJO7b/rhLOKiKbemX5G/Mt/OztQ
+        AurY0hxp/rFS2ORyOsw/oCVcVO88CmPoySqNZemHNKq6T7DIgAnVMvLPNw37/KeD
+        9FX275ENKix5RA3TYwIDAQAB
+        -----END PUBLIC KEY-----
+    depends_on:
+      - mysql
+  
+  todos_service:
+    image: todos-service:latest
+    container_name: monorepo_todos_service
+    build:
+      context: .
+      dockerfile: service.dockerfile
+      args:
+        SERVICE_NAME: 'todos'
+    env_file:
+      - ./services/todos/.env
+    environment:
+      AUTH_PUBLIC_KEY: |-
+        -----BEGIN PUBLIC KEY-----
+        MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC43UF6vXOjuun1d1+jYs/lauEQ
+        ySSWmsg2w3i7q4TsZbjEs4opbh1e0R7RG23fsgJO7b/rhLOKiKbemX5G/Mt/OztQ
+        AurY0hxp/rFS2ORyOsw/oCVcVO88CmPoySqNZemHNKq6T7DIgAnVMvLPNw37/KeD
+        9FX275ENKix5RA3TYwIDAQAB
+        -----END PUBLIC KEY-----
+    # depends_on:
+    #   - mongo
+
+  nginx:
+    image: nginx:1.14-alpine
+    container_name: monorepo_nginx
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    ports:
+      - ${NGINX_PORT}:80
+    depends_on:
+      - users_service
+      - todos_service

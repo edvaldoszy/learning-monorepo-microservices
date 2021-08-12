@@ -4,7 +4,6 @@
   "private": true,
   "author": "Edvaldo Szymonek <edvaldoszy@gmail.com>",
   "scripts": {
-    "build:types": "yarn workspaces foreach run build:types",
     "build:packages": "yarn workspaces foreach -v --exclude='@monorepo/*-service' run build",
     "test": "jest",
     "lint": "eslint --cache --ext '.js,.ts' ."

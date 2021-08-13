@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from '@tinyhttp/app';
 
-// import ForbiddenError from '~/errors/forbidden';
 import UnauthorizedError from '~/errors/unauthorized';
-// import { validateJwt } from '~/helpers/jwt';
+import { validateJwt } from '~/helpers/jwt';
 
 function extractAuthWithScheme(scheme: string, authorization: string) {
   const [extractedScheme, extractedValue] = authorization.split(' ') || [];
@@ -24,19 +23,11 @@ async function authorizationMiddleware(request: Request, _: Response, next: Next
     throw new UnauthorizedError(30);
   }
 
-  // const decoded = validateJwt(token);
-  // const user = await knex('users')
-  //   .where({
-  //     id: decoded.sub,
-  //     active: true,
-  //   })
-  //   .first();
-
-  // if (!user) {
-  //   throw new ForbiddenError(31);
-  // }
-
-  // request.user = user;
+  const decoded = validateJwt(token);
+  request.user = {
+    id: decoded.sub,
+    email: decoded.email,
+  };
   next();
 }
 

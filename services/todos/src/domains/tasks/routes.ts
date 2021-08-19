@@ -10,6 +10,13 @@ const routes: Route[] = [
       controllers.create,
     ],
   },
+  {
+    method: 'put',
+    path: '/todos/tasks/:taskId',
+    handlers: [
+      controllers.update,
+    ],
+  },
 ];
 
 export default routes;

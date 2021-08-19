@@ -1,4 +1,5 @@
-import { MongoClient, MongoClientOptions } from 'mongodb';
+import Agenda from 'agenda';
+import { MongoClientOptions } from 'mongodb';
 
 import mongoConfig from '~/config/mongo';
 
@@ -11,6 +12,12 @@ const options: MongoClientOptions = {
   },
 };
 
-const client = new MongoClient(uri, options);
+const agenda = new Agenda({
+  db: {
+    address: uri,
+    collection: 'jobs',
+    options,
+  },
+});
 
-export default client;
+export default agenda;

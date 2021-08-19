@@ -10,8 +10,6 @@ const mongoConfig = {
   port: Number(MONGO_PORT),
   username: MONGO_USERNAME,
   password: MONGO_PASSWORD,
-  // database: MYSQL_DATABASE,
-  // charset: 'utf8mb4',
 };
 
 export default mongoConfig;

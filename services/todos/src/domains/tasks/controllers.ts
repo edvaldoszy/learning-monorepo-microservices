@@ -1,22 +1,22 @@
 import { pick } from '@monorepo/helpers';
 import { Request, Response } from '@tinyhttp/app';
 import isAfter from 'date-fns/isAfter';
-import { ObjectId } from 'mongodb';
+import { Document, ObjectId } from 'mongodb';
 
 import agenda from '~/factories/agenda';
 import mongo from '~/factories/mongo';
 
-const tasksRepository = mongo.db('todos')
-  .collection('tasks');
-
-interface Task {
-  _id: string;
+interface Task extends Document {
+  _id: ObjectId;
   title: string;
   description: string;
   due_date: Date; // eslint-disable-line camelcase
   is_done: boolean; // eslint-disable-line camelcase
   reminders: Date[];
 }
+
+const tasksRepository = mongo.db('todos')
+  .collection<Task>('tasks');
 
 function formatValues(request: Request) {
   const fields = [
@@ -83,7 +83,7 @@ async function create(request: Request, response: Response) {
     .insertOne(taskValues)
     .then(result => tasksRepository.findOne({ _id: result.insertedId }));
 
-  await afterCreateOrUpdate(task as Task);
+  await afterCreateOrUpdate(task!);
 
   response.status(201)
     .json(task);
@@ -102,7 +102,7 @@ async function update(request: Request, response: Response) {
     .updateOne({ _id: new ObjectId(taskId) }, { $set: taskValues });
   const task = await tasksRepository.findOne({ _id: new ObjectId(taskId) });
 
-  await afterCreateOrUpdate(task as Task);
+  await afterCreateOrUpdate(task!);
 
   response.status(200)
     .json(task);

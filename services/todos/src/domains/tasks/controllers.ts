@@ -3,6 +3,7 @@ import { Request, Response } from '@tinyhttp/app';
 import isAfter from 'date-fns/isAfter';
 import { Document, ObjectId } from 'mongodb';
 
+import NotFoundError from '~/errors/not-found';
 import agenda from '~/factories/agenda';
 import mongo from '~/factories/mongo';
 
@@ -46,15 +47,19 @@ function formatValues(request: Request) {
   return pickedValues;
 }
 
+function deleteAllTaskReminders(taskId: string) {
+  return agenda.cancel({
+    name: 'TaskReminder',
+    data: { task_id: new ObjectId(taskId) },
+  });
+}
+
 async function afterCreateOrUpdate(task: Task) {
   if (!Array.isArray(task.reminders)) {
     return;
   }
 
-  await agenda.cancel({
-    name: 'TaskReminder',
-    data: { task_id: new ObjectId(task._id) }, // eslint-disable-line no-underscore-dangle
-  });
+  await deleteAllTaskReminders(String(task._id)); // eslint-disable-line no-underscore-dangle
 
   const shouldCreateTaskReminders = !task.is_done
     && isAfter(task.due_date, new Date());
@@ -108,7 +113,75 @@ async function update(request: Request, response: Response) {
     .json(task);
 }
 
+async function find(request: Request, response: Response) {
+  const { page, limit, offset } = request.pagination!;
+
+  const cursor = tasksRepository
+    .find({
+      user_id: request.user.id,
+    });
+
+  const [
+    total,
+    tasks,
+  ] = await Promise.all([
+    cursor.count(),
+    cursor
+      .skip(offset)
+      .limit(limit)
+      .toArray(),
+  ]);
+
+  response.json({
+    metadata: {
+      page,
+      limit,
+      total,
+    },
+    result: tasks,
+  });
+}
+
+async function get(request: Request, response: Response) {
+  const task = await tasksRepository
+    .findOne({
+      user_id: request.user.id,
+      _id: new ObjectId(request.params.taskId),
+    });
+  if (!task) {
+    throw new NotFoundError(20);
+  }
+
+  response.json(task);
+}
+
+async function remove(request: Request, response: Response) {
+  const { taskId } = request.params;
+
+  const task = await tasksRepository
+    .findOne({
+      user_id: request.user.id,
+      _id: new ObjectId(taskId),
+    });
+  if (!task) {
+    throw new NotFoundError(20);
+  }
+
+  await deleteAllTaskReminders(taskId);
+
+  await tasksRepository
+    .deleteOne({
+      user_id: request.user.id,
+      _id: new ObjectId(taskId),
+    });
+
+  response.sendStatus(204);
+}
+
 export default {
   create,
   update,
+  find,
+  get,
+  remove,
 };

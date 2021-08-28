@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from '@tinyhttp/app';
+import { TokenExpiredError } from 'jsonwebtoken';
 
+import ForbiddenError from '~/errors/forbidden';
 import UnauthorizedError from '~/errors/unauthorized';
 import { validateJwt } from '~/helpers/jwt';
 
@@ -23,12 +25,21 @@ async function authorizationMiddleware(request: Request, _: Response, next: Next
     throw new UnauthorizedError(30);
   }
 
-  const decoded = validateJwt(token);
-  request.user = {
-    id: decoded.sub,
-    email: decoded.email,
-  };
-  next();
+  try {
+    const decoded = validateJwt(token);
+    request.user = {
+      id: decoded.sub,
+      email: decoded.email,
+    };
+    next();
+
+  } catch (err) {
+    if (err instanceof TokenExpiredError) {
+      throw new ForbiddenError(31);
+    }
+
+    throw err;
+  }
 }
 
 export default authorizationMiddleware;

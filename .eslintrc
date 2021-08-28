@@ -26,6 +26,7 @@
     }
   },
   "rules": {
+    "radix": "off",
     "no-console": [
       "error",
       {

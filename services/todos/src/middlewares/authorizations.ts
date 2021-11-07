@@ -20,7 +20,7 @@ async function authorizationMiddleware(request: Request, _: Response, next: Next
     throw new UnauthorizedError(30);
   }
 
-  const token = extractAuthWithScheme('Bearer', authorization);
+  const token = extractAuthWithScheme('JWT', authorization);
   if (!token) {
     throw new UnauthorizedError(30);
   }

@@ -53,6 +53,7 @@ services:
     env_file:
       - ./services/users/.env
     environment:
+      PORT: 3000
       MYSQL_HOST: mysql
       AUTH_PRIVATE_KEY: |-
         -----BEGIN RSA PRIVATE KEY-----
@@ -91,6 +92,8 @@ services:
     env_file:
       - ./services/todos/.env
     environment:
+      PORT: 3000
+      MONGO_HOST: mongo
       AUTH_PUBLIC_KEY: |-
         -----BEGIN PUBLIC KEY-----
         MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC43UF6vXOjuun1d1+jYs/lauEQ

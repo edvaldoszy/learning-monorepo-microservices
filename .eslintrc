@@ -27,6 +27,7 @@
   },
   "rules": {
     "radix": "off",
+    "camelcase": "off",
     "no-console": [
       "error",
       {

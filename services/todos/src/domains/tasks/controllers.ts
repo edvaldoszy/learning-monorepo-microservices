@@ -35,8 +35,8 @@ function formatValues(request: Request) {
     };
   }
   if (Array.isArray(pickedValues.reminders)) {
-    const reminders = pickedValues.reminders
-      .map((reminder: string) => new Date(reminder)) as Date[];
+    const reminders = (pickedValues.reminders as string[])
+      .map(reminder => new Date(reminder));
 
     pickedValues = {
       ...pickedValues,

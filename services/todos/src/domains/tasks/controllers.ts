@@ -4,6 +4,7 @@ import isAfter from 'date-fns/isAfter';
 import { Document, ObjectId } from 'mongodb';
 
 import NotFoundError from '~/errors/not-found';
+import PreconditionFailedError from '~/errors/precondition-failed';
 import agenda from '~/factories/agenda';
 import mongo from '~/factories/mongo';
 
@@ -18,9 +19,12 @@ interface Task extends Document {
 
 const tasksRepository = mongo.db('todos')
   .collection<Task>('tasks');
+const listsRepository = mongo.db('todos')
+  .collection('lists');
 
 function formatValues(request: Request) {
   const fields = [
+    'list_id',
     'title',
     'description',
     'due_date',
@@ -45,6 +49,22 @@ function formatValues(request: Request) {
   }
 
   return pickedValues;
+}
+
+async function throwIfListNotExist(request: Request, listId?: number) {
+  if (!listId) {
+    return;
+  }
+
+  const list = await listsRepository
+    .find({
+      user_id: request.user.id,
+      _id: new ObjectId(listId),
+    })
+    .count();
+  if (!list) {
+    throw new PreconditionFailedError(200);
+  }
 }
 
 function deleteAllTaskReminders(taskId: string) {
@@ -84,6 +104,8 @@ async function create(request: Request, response: Response) {
     user_id: request.user.id,
   };
 
+  await throwIfListNotExist(request, taskValues.list_id);
+
   const task = await tasksRepository
     .insertOne(taskValues)
     .then(result => tasksRepository.findOne({ _id: result.insertedId }));
@@ -103,9 +125,15 @@ async function update(request: Request, response: Response) {
     user_id: request.user.id,
   };
 
+  const task = await tasksRepository.findOne({ _id: new ObjectId(taskId) });
+  if (!task) {
+    throw new NotFoundError(20);
+  }
+
+  await throwIfListNotExist(request, pickedValues.list_id);
+
   await tasksRepository
     .updateOne({ _id: new ObjectId(taskId) }, { $set: taskValues });
-  const task = await tasksRepository.findOne({ _id: new ObjectId(taskId) });
 
   await afterCreateOrUpdate(task!);
 

@@ -16,7 +16,7 @@ interface List extends Document {
 const listsRepository = mongo.db('todos')
   .collection<List>('lists');
 const tasksRepository = mongo.db('todos')
-  .collection<List>('tasks');
+  .collection('tasks');
 
 function formatValues(request: Request) {
   const fields = [
@@ -121,7 +121,7 @@ async function remove(request: Request, response: Response) {
     })
     .count();
   if (tasksCount) {
-    throw new PreconditionFailedError(200);
+    throw new PreconditionFailedError(300);
   }
 
   await listsRepository

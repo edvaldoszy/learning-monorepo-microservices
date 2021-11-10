@@ -32,6 +32,12 @@ function formatValues(request: Request) {
     'reminders',
   ];
   let pickedValues = pick(request.body, fields);
+  if (pickedValues.list_id) {
+    pickedValues = {
+      ...pickedValues,
+      list_id: new ObjectId(pickedValues.list_id),
+    };
+  }
   if (pickedValues.due_date) {
     pickedValues = {
       ...pickedValues,

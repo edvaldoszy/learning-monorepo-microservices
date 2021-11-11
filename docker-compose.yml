@@ -101,8 +101,8 @@ services:
         AurY0hxp/rFS2ORyOsw/oCVcVO88CmPoySqNZemHNKq6T7DIgAnVMvLPNw37/KeD
         9FX275ENKix5RA3TYwIDAQAB
         -----END PUBLIC KEY-----
-    # depends_on:
-    #   - mongo
+    depends_on:
+      - mongo
 
   nginx:
     image: nginx:1.14-alpine

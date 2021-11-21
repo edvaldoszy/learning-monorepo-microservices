@@ -26,13 +26,17 @@ function parseIfObjectId(column: string, value: any) {
   if (!column.endsWith('_id')) {
     return value;
   }
-
   if (Array.isArray(value)) {
-    return value
-      .filter((v: string) => ObjectId.isValid(v))
-      .map((v: string) => new ObjectId(v));
+    const isAllValidObjectId = value.filter((v: string) => ObjectId.isValid(v));
+    if (isAllValidObjectId) {
+      return value.map((v: string) => new ObjectId(v));
+    }
+    return value;
   }
-  return new ObjectId(value);
+  if (ObjectId.isValid(value)) {
+    return new ObjectId(value);
+  }
+  return value;
 }
 
 function translateCondition(condition: WhereTuple) {

@@ -22,33 +22,41 @@ const operatorsMap: Record<string, string | OperatorFunction> = {
   },
 };
 
+function parseIfObjectId(column: string, value: any) {
+  if (!column.endsWith('_id')) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .filter((v: string) => ObjectId.isValid(v))
+      .map((v: string) => new ObjectId(v));
+  }
+  return new ObjectId(value);
+}
+
 function translateCondition(condition: WhereTuple) {
   const [column, operator, value] = condition;
   const operatorValue = operatorsMap[operator];
   if (!operatorValue) {
     return null;
   }
+
+  const parsedValue = parseIfObjectId(column, value);
   if (typeof operatorValue === 'function') {
     return {
-      [column]: operatorValue(value),
-    };
-  }
-  if (column === '_id' && ObjectId.isValid(value)) {
-    return {
-      [column]: { [operatorValue]: new ObjectId(value) },
+      [column]: operatorValue(parsedValue),
     };
   }
   const DATE_REGEX = /^\d{4}(?:-\d{2}){2}T(?:[0-1][0-9]|2[0-3])(?::[0-5][0-9]){2}(?:\.[0-9]{3})?Z$/g;
-  if (typeof value === 'string' && value.length >= 20 && value.length <= 24 && DATE_REGEX.test(value)) {
+  if (typeof parsedValue === 'string' && parsedValue.length <= 24 && DATE_REGEX.test(parsedValue)) {
     return {
-      [column]: { [operatorValue]: new Date(value) },
+      [column]: { [operatorValue]: new Date(parsedValue) },
     };
   }
-
   return {
-    [column]: { [operatorValue]: value },
+    [column]: { [operatorValue]: parsedValue },
   };
-
 }
 
 async function queriesMiddleware(request: Request, _: Response, next: NextFunction) {

@@ -89,25 +89,8 @@ async function refresh(request: Request, response: Response) {
     });
 }
 
-async function list(request: Request, response: Response) {
-  const usersQuery = knex('users')
-    .where({
-      active: true,
-    });
-  request.filterBy!(usersQuery);
-
-  const users = await usersQuery;
-
-  response
-    .json({
-      metadata: null,
-      result: users,
-    });
-}
-
 export default {
   register,
   login,
   refresh,
-  list,
 };

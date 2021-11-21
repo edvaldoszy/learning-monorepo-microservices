@@ -64,10 +64,11 @@ async function update(request: Request, response: Response) {
 async function find(request: Request, response: Response) {
   const { page, limit, offset } = request.pagination!;
 
+  const conditions = request.filterBy!({
+    user_id: request.user.id,
+  });
   const cursor = listsRepository
-    .find({
-      user_id: request.user.id,
-    });
+    .find(conditions);
 
   const [
     total,

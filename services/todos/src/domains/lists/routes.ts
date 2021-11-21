@@ -1,4 +1,4 @@
-import queryMiddleware from '~/middlewares/queries';
+import queriesMiddleware from '~/middlewares/queries';
 import { Route } from '~/routes';
 
 import controllers from './controllers';
@@ -22,7 +22,7 @@ const routes: Route[] = [
     method: 'get',
     path: '/todos/lists',
     handlers: [
-      queryMiddleware,
+      queriesMiddleware,
       controllers.find,
     ],
   },

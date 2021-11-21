@@ -8,5 +8,6 @@ declare module '@tinyhttp/app' {
       limit: number;
       offset: number;
     };
+    filterBy?: (builder: object) => object;
   }
 }

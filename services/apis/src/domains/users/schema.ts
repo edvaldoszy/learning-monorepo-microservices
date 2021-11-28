@@ -3,25 +3,30 @@ import axios from 'axios';
 import EntityMetadata from '~/entities/EntityMetadata';
 import { forwardAuthorizationHeader } from '~/helpers/auth';
 
-export class Task {
+export class User {
 
-  _id: string;
-  title: string;
-  description: string;
-  is_done: boolean;
+  id: string;
+  name: string;
+  email: string;
 
 }
 
-const userMetadata: EntityMetadata<Task> = {
-  modelClass: Task,
-  name: 'Task',
-  primaryKey: '_id',
+const userMetadata: EntityMetadata<User> = {
+  modelClass: User,
+  name: 'User',
+  primaryKey: 'id',
 
   properties: {
-    _id: 'string',
-    title: 'string',
-    description: 'string',
-    is_done: 'boolean',
+    id: 'integer',
+    name: 'string',
+    email: 'string',
+  },
+
+  hasMany: {
+    tasks: {
+      target: 'Task',
+      foreignKey: 'user_id',
+    },
   },
 
   provider: {
@@ -29,9 +34,12 @@ const userMetadata: EntityMetadata<Task> = {
       const headers = forwardAuthorizationHeader(context.request.headers);
       const params = {
         fields: JSON.stringify(fields),
-        filters: JSON.stringify(filters),
+        filters: JSON.stringify([
+          ...filters,
+          ['users.name', 'contains', 'Edvaldo'],
+        ]),
       };
-      const response = await axios.get('http://localhost:3001/api/todos/tasks', { params, headers });
+      const response = await axios.get('http://localhost:3000/api/users', { params, headers });
       return response.data.result;
     },
     async fetchOne(context, fields, id, filters) {
@@ -40,7 +48,7 @@ const userMetadata: EntityMetadata<Task> = {
         fields: JSON.stringify(fields),
         filters: JSON.stringify(filters),
       };
-      const response = await axios.get(`http://localhost:3001/api/todos/tasks/${id}`, { params, headers });
+      const response = await axios.get(`http://localhost:3000/api/users/${id}`, { params, headers });
       return response.data.result;
     },
   },

@@ -2,13 +2,19 @@ import { logger } from '@tinyhttp/logger';
 import { json as parseJSON } from 'body-parser';
 
 import createApp from './factories/app';
-import graphql from './graphql';
+import createGraphQL from './factories/graphql';
 import routes from './routes';
 
-const app = createApp();
-app.use(logger());
-app.use(parseJSON({ strict: true }));
-app.use('/graphql', graphql);
-app.use(routes);
+async function configureApp() {
+  const app = createApp();
+  const graphql = await createGraphQL('domains/**/schema.{js,ts}', __dirname);
 
-export default app;
+  app.use(logger());
+  app.use(parseJSON({ strict: true }));
+  app.use('/graphql', graphql);
+  app.use(routes);
+
+  return app;
+}
+
+export default configureApp;

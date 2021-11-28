@@ -1,25 +1,49 @@
 import axios from 'axios';
 
+import EntityMetadata from '~/entities/EntityMetadata';
 import { forwardAuthorizationHeader } from '~/helpers/auth';
 
-const schema = {
+export class Task {
+
+  _id: string;
+  title: string;
+  description: string;
+  is_done: boolean;
+
+}
+
+const userMetadata: EntityMetadata<Task> = {
+  modelClass: Task,
   name: 'Task',
+  primaryKey: '_id',
 
-  belongsTo: {
-    target: 'List',
-    async resolve(context: any, ids: any[]) {
-      const { request } = context;
+  properties: {
+    _id: 'string',
+    title: 'string',
+    description: 'string',
+    is_done: 'boolean',
+  },
 
-      const headers = forwardAuthorizationHeader(request.headers);
+  provider: {
+    async fetchAll(context, fields, filters) {
+      const headers = forwardAuthorizationHeader(context.request.headers);
       const params = {
-        filters: [
-          ['_id', 'in', ids],
-        ],
+        fields,
+        filters,
       };
-      const response = await axios.get('http://localhost:3001/api/todos/lists', { params, headers });
+      const response = await axios.get('http://localhost:3001/api/todos/tasks', { params, headers });
+      return response.data.result;
+    },
+    async fetchOne(context, fields, id, filters) {
+      const headers = forwardAuthorizationHeader(context.request.headers);
+      const params = {
+        fields,
+        filters,
+      };
+      const response = await axios.get(`http://localhost:3001/api/todos/tasks/${id}`, { params, headers });
       return response.data.result;
     },
   },
 };
 
-export default schema;
+export default userMetadata;

@@ -8,8 +8,8 @@ function extractAuthWithScheme(scheme: string, authorization: string) {
 }
 
 export function forwardAuthorizationHeader(headers: Record<string, string>) {
-  const token = extractAuthWithScheme('Bearer', headers.authorization);
+  const token = extractAuthWithScheme('JWT', headers.authorization);
   return {
-    Authorization: `Bearer ${token}`,
+    Authorization: `JWT ${token}`,
   };
 }

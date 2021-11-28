@@ -4,9 +4,9 @@ import { ObjectId } from 'mongodb';
 import appConfig from '~/config/app';
 
 type WhereTuple = [string, string, any];
-type WhereObject = { andWhere: Array<WhereTuple>, orWhere: Array<WhereTuple> };
+type WhereObject = { orWhere: Array<WhereTuple> };
 type Filters = Array<WhereObject | WhereTuple>;
-type OperatorFunction = (value: any) => { [key: string]: any };
+type OperatorFunction = (value: any) => { [operator: string]: any };
 
 const operatorsMap: Record<string, string | OperatorFunction> = {
   eq: '$eq',
@@ -27,13 +27,13 @@ function parseIfObjectId(column: string, value: any) {
     return value;
   }
   if (Array.isArray(value)) {
-    const isAllValidObjectId = value.filter((v: string) => ObjectId.isValid(v));
-    if (isAllValidObjectId) {
+    const isAllValidObjectId = value.filter((val: string) => val.length === 24 && ObjectId.isValid(val));
+    if (isAllValidObjectId.length) {
       return value.map((v: string) => new ObjectId(v));
     }
     return value;
   }
-  if (ObjectId.isValid(value)) {
+  if (value.length === 24 && ObjectId.isValid(value)) {
     return new ObjectId(value);
   }
   return value;
@@ -87,37 +87,45 @@ async function queriesMiddleware(request: Request, _: Response, next: NextFuncti
     offset,
   };
 
-  let filters: Filters;
-  const { filters: filtersRequestQuery } = query;
-  if (Array.isArray(filtersRequestQuery)) {
-    filters = filtersRequestQuery.map(item => JSON.parse(item));
-  } else if (typeof filtersRequestQuery === 'string') {
-    filters = JSON.parse(filtersRequestQuery);
-  }
-
-  request.filterBy = (queryObject: object) => {
-    if (!filters) {
-      return queryObject;
+  try {
+    const filtersRequestQuery = query.filters || query['filters[]'];
+    let filters: Filters;
+    if (Array.isArray(filtersRequestQuery)) {
+      filters = filtersRequestQuery.map(item => JSON.parse(item));
+    } else if (typeof filtersRequestQuery === 'string') {
+      filters = JSON.parse(filtersRequestQuery);
     }
 
-    const andConditions = filters
-      .map(conditionOrObject => {
-        if (Array.isArray(conditionOrObject)) {
-          return translateCondition(conditionOrObject);
-        }
-        if (conditionOrObject.orWhere) {
-          return {
-            $or: conditionOrObject.orWhere.map(translateCondition),
-          };
-        }
-        return conditionOrObject.andWhere.map(translateCondition);
-      })
-      .filter(Boolean);
-    return {
-      ...queryObject,
-      $and: andConditions,
+    request.filterBy = (queryObject: object) => {
+      if (!filters?.length) {
+        return queryObject;
+      }
+
+      const andConditions = filters
+        .map(conditionOrObject => {
+          if (Array.isArray(conditionOrObject)) {
+            return translateCondition(conditionOrObject);
+          }
+          if (conditionOrObject.orWhere) {
+            return {
+              $or: conditionOrObject.orWhere.map(translateCondition),
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
+      if (!andConditions.length) {
+        return queryObject;
+      }
+
+      return {
+        ...queryObject,
+        $and: andConditions,
+      };
     };
-  };
+  } catch (error) {
+    console.warn('Failed while parsing filters object', error);
+  }
 
   next();
 }

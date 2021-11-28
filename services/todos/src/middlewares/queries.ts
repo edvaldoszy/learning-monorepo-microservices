@@ -27,13 +27,13 @@ function parseIfObjectId(column: string, value: any) {
     return value;
   }
   if (Array.isArray(value)) {
-    const isAllValidObjectId = value.filter((v: string) => ObjectId.isValid(v));
-    if (isAllValidObjectId) {
+    const isAllValidObjectId = value.filter((val: string) => val.length === 24 && ObjectId.isValid(val));
+    if (isAllValidObjectId.length) {
       return value.map((v: string) => new ObjectId(v));
     }
     return value;
   }
-  if (ObjectId.isValid(value)) {
+  if (value.length === 24 && ObjectId.isValid(value)) {
     return new ObjectId(value);
   }
   return value;

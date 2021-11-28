@@ -1,6 +1,5 @@
-import axios from 'axios';
-
 import EntityMetadata from '~/entities/EntityMetadata';
+import todosApi from '~/factories/todos-api';
 import { forwardAuthorizationHeader } from '~/helpers/auth';
 
 export class Task {
@@ -24,6 +23,13 @@ const userMetadata: EntityMetadata<Task> = {
     is_done: 'boolean',
   },
 
+  belongsTo: {
+    user: {
+      target: 'User',
+      foreignKey: 'user_id',
+    },
+  },
+
   provider: {
     async fetchAll(context, fields, filters) {
       const headers = forwardAuthorizationHeader(context.request.headers);
@@ -31,7 +37,7 @@ const userMetadata: EntityMetadata<Task> = {
         fields: JSON.stringify(fields),
         filters: JSON.stringify(filters),
       };
-      const response = await axios.get('http://localhost:3001/api/todos/tasks', { params, headers });
+      const response = await todosApi.get('/api/todos/tasks', { params, headers });
       return response.data.result;
     },
     async fetchOne(context, fields, id, filters) {
@@ -40,7 +46,7 @@ const userMetadata: EntityMetadata<Task> = {
         fields: JSON.stringify(fields),
         filters: JSON.stringify(filters),
       };
-      const response = await axios.get(`http://localhost:3001/api/todos/tasks/${id}`, { params, headers });
+      const response = await todosApi.get(`/api/todos/tasks/${id}`, { params, headers });
       return response.data.result;
     },
   },

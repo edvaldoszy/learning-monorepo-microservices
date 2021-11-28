@@ -37,6 +37,36 @@ function createLoaders() {
 
       return loader;
     },
+
+    belongsTo(relationSchema: RelationSchema<any, any>, _args: any, context: any, info: GraphQLResolveInfo) {
+      const {
+        name, parent, target, targetIdProperty,
+      } = relationSchema;
+      const cacheKey = `${parent.name}_BelongsTo_${target.name}_${name}`;
+      let loader = this.cacheMap.get(cacheKey);
+
+      if (!loader) {
+        loader = new DataLoader(async ids => {
+          const [rootSelectionNode] = info.fieldNodes;
+          const fields = getFieldsFromSelectionNode(rootSelectionNode);
+          const filters = [
+            [targetIdProperty, 'in', ids],
+          ];
+          const records = await target.fetchAll(context, fields, filters);
+
+          const groups = records
+            .reduce((map, record) => {
+              const mapKey = record[targetIdProperty];
+              return map.set(mapKey, record);
+            }, new Map());
+
+          return ids.map(id => groups.get(id) || null);
+        });
+        this.cacheMap.set(cacheKey, loader);
+      }
+
+      return loader;
+    },
   };
 }
 

@@ -1,6 +1,5 @@
-import axios from 'axios';
-
 import EntityMetadata from '~/entities/EntityMetadata';
+import usersApi from '~/factories/users-api';
 import { forwardAuthorizationHeader } from '~/helpers/auth';
 
 export class User {
@@ -34,12 +33,9 @@ const userMetadata: EntityMetadata<User> = {
       const headers = forwardAuthorizationHeader(context.request.headers);
       const params = {
         fields: JSON.stringify(fields),
-        filters: JSON.stringify([
-          ...filters,
-          ['users.name', 'contains', 'Edvaldo'],
-        ]),
+        filters: JSON.stringify(filters),
       };
-      const response = await axios.get('http://localhost:3000/api/users', { params, headers });
+      const response = await usersApi.get('/api/users', { params, headers });
       return response.data.result;
     },
     async fetchOne(context, fields, id, filters) {
@@ -48,7 +44,7 @@ const userMetadata: EntityMetadata<User> = {
         fields: JSON.stringify(fields),
         filters: JSON.stringify(filters),
       };
-      const response = await axios.get(`http://localhost:3000/api/users/${id}`, { params, headers });
+      const response = await usersApi.get(`/api/users/${id}`, { params, headers });
       return response.data.result;
     },
   },

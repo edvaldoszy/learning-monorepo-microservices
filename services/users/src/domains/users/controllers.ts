@@ -94,7 +94,7 @@ async function list(request: Request, response: Response) {
     .where({
       active: true,
     });
-  request.filterBy!(usersQuery);
+  request.filterBy?.(usersQuery);
 
   const users = await usersQuery;
 

@@ -1,112 +1,102 @@
 import { Request, Response, NextFunction } from '@tinyhttp/app';
 import { Knex } from 'knex';
 
-type OperatorFunction = (value: any) => [string, any];
+import appConfig from '~/config/app';
+
+type WhereTuple = [string, string, any];
+type WhereObject = { orWhere: Array<WhereTuple> };
+type Filters = Array<WhereObject | WhereTuple>;
+type OperatorFunction = (column: string, value: any) => [string, string, any];
 
 const operatorsMap: Record<string, string | OperatorFunction> = {
   eq: '=',
+  ne: '!=',
   gt: '>',
   gte: '>=',
   lt: '<',
   lte: '<=',
-  between: 'between',
   in: 'in',
-  contains(value: any) {
-    return ['like', `%${value}%`];
+  contains(column: string, value: any) {
+    return [column, 'like', `%${value}%`];
   },
 };
 
-function translateOperator(operator: string, value: any) {
+function translateCondition(condition: WhereTuple): [string, string, any] | null {
+  const [column, operator, value] = condition;
   const operatorValue = operatorsMap[operator];
-  if (typeof operatorValue === 'string') {
-    return [operatorValue, value];
-  } if (typeof operatorValue === 'function') {
-    return operatorValue(value);
-  }
-  return [null, value];
-}
-
-function isObject(value: any): value is object {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
-function isPrimitiveValue(value: any): value is string {
-  if (value === null) {
-    return true;
-  }
-  const type = typeof value;
-  if (type === 'string' || type === 'number' || type === 'boolean') {
-    return true;
-  }
-  return false;
-}
-
-function addWhereCondition(
-  query: Knex.QueryBuilder,
-  column: string,
-  conditionsObjectOrValue: object | string,
-  isOr: boolean = false,
-) {
-  const func = isOr ? 'orWhere' : 'andWhere';
-  if (isPrimitiveValue(conditionsObjectOrValue)) {
-    query[func](column, conditionsObjectOrValue);
-    return query;
+  if (!operatorValue) {
+    return null;
   }
 
-  if (isObject(conditionsObjectOrValue)) {
-    Object.entries(conditionsObjectOrValue)
-      .map(entry => translateOperator(...entry))
-      .forEach(entry => {
-        console.warn({ entry });
-        const [operator, value] = entry;
-        if (operator) {
-          query[func](column, operator, value);
-        }
-      });
-    return query;
+  if (typeof operatorValue === 'function') {
+    return operatorValue(column, value);
   }
-
-  return query;
+  return [column, operatorValue, value];
 }
 
 async function queriesMiddleware(request: Request, _: Response, next: NextFunction) {
-  const filtersObjectOrArray = JSON.parse(request.query.filters as string) as object | object[];
+  const { query } = request;
 
-  request.filterBy = (query: Knex.QueryBuilder) => {
-    if (Array.isArray(filtersObjectOrArray)) {
-      query.where(whereQb => {
-        filtersObjectOrArray
-          .filter(isObject)
-          .forEach(filterObject => {
-            whereQb.orWhere(orWhereQb => {
-              Object.entries(filterObject)
-                .forEach(entry => {
-                  const [column, conditions] = entry;
-                  addWhereCondition(orWhereQb, column, conditions);
-                });
-            });
+  let page = parseInt(query.page as string);
+  let limit = parseInt(query.limit as string);
+
+  const isValidPageValue = typeof page === 'number' && page > 0;
+  if (!isValidPageValue) {
+    page = 1;
+  }
+
+  const isValidLimitValue = typeof limit === 'number' && limit > 0 && limit < 10000;
+  if (!isValidLimitValue) {
+    limit = appConfig.pagination.limit;
+  }
+
+  const offset = (page - 1) * limit;
+
+  request.pagination = {
+    page,
+    limit,
+    offset,
+  };
+
+  try {
+    const filtersRequestQuery = query.filters || query['filters[]'];
+    let filters: Filters;
+    if (Array.isArray(filtersRequestQuery)) {
+      filters = filtersRequestQuery.map(item => JSON.parse(item));
+    } else if (typeof filtersRequestQuery === 'string') {
+      filters = JSON.parse(filtersRequestQuery);
+    }
+
+    request.filterBy = (builder: Knex.QueryInterface) => {
+      if (!filters?.length) {
+        return builder;
+      }
+
+      filters.forEach(conditionOrObject => {
+        if (Array.isArray(conditionOrObject)) {
+          const result = translateCondition(conditionOrObject);
+          console.warn({ result });
+          if (result) {
+            builder.where(...result);
+          }
+        } else if (conditionOrObject.orWhere) {
+          builder.where(whereQb => {
+            conditionOrObject.orWhere
+              .forEach(condition => {
+                const result = translateCondition(condition);
+                if (result) {
+                  whereQb.orWhere(...result);
+                }
+              });
           });
+        }
       });
 
-    } else if (isObject(filtersObjectOrArray)) {
-      Object.entries(filtersObjectOrArray)
-        .forEach(entry => {
-          console.warn({ entry });
-          const [column, conditionsObjectOrArray] = entry;
-          if (Array.isArray(conditionsObjectOrArray)) {
-            query.where(whereQb => {
-              conditionsObjectOrArray
-                .filter(isObject)
-                .forEach(conditionsObject => {
-                  addWhereCondition(whereQb, column, conditionsObject, true);
-                });
-            });
-          } else {
-            addWhereCondition(query, column, conditionsObjectOrArray);
-          }
-        });
-    }
-  };
+      return builder;
+    };
+  } catch (error) {
+    console.warn('Failed while parsing filters object', error);
+  }
 
   next();
 }
